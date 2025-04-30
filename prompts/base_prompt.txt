@@ -1,0 +1,6 @@
+# This is a customizable prompt template for the Anti-AI Agent.
+# Modify the content below to influence the agent's responses.
+
+{user_input}  # Placeholder for user input
+
+{agent_response}  # Placeholder for the agent's unhelpful response
