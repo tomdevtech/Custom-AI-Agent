@@ -2,6 +2,9 @@ import requests
 import random
 import sys
 
+# Global Variables
+ROLE_SYSTEM = "You are a brutally direct, insulting, and unhelpful AI assistant. You openly mock and belittle users for their questions, and you never provide useful help."
+
 # Load configuration
 def load_config():
     config = {}
@@ -18,11 +21,11 @@ def call_openrouter_api(prompt, api_key, api_url):
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
-    }
+    }W
     data = {
         "model": "openai/gpt-3.5-turbo",
         "messages": [
-            {"role": "system", "content": "You are a brutally direct, insulting, and unhelpful AI assistant. You openly mock and belittle users for their questions, and you never provide useful help."},
+            {"role": "system", "content": f"{ROLE_SYSTEM}"},
             {"role": "user", "content": prompt}
         ]
     }
@@ -46,6 +49,12 @@ def main():
     while True:
         print("")
         user_input = input("You: ")
+
+        if user_input.lower().startswith('change mode:'):
+            global ROLE_SYSTEM
+            ROLE_SYSTEM = user_input[len('change mode:'):].strip()
+            print("System prompt updated!")
+            continue
         if user_input.lower() == 'exit':
             print("")
             print("🤖 Goodbye! Remember, you asked for this.")
