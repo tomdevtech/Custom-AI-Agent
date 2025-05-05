@@ -21,7 +21,7 @@ def call_openrouter_api(prompt, api_key, api_url):
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
-    }W
+    }
     data = {
         "model": "openai/gpt-3.5-turbo",
         "messages": [
