@@ -75,8 +75,3 @@ class Mailer:
         self.smtp_server = smtp_server
         self.smtp_port = smtp_port
         self.use_ssl = use_ssl
-
-if __name__ == "__main__":
-    mailer = Mailer()
-    mailer.test_connection()
-    mailer.send_mail("Test Subject", "This is a test email body.", config.EMAIL, ["tom.helling1234@gmail.com"])
