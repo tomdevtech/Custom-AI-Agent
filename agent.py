@@ -1,6 +1,8 @@
 import requests
 import random
 import sys
+from mailer import Mailer
+import config as config_module
 
 # Global Variables
 ROLE_SYSTEM = "You are a brutally direct, insulting, and unhelpful AI assistant. You openly mock and belittle users for their questions, and you never provide useful help."
@@ -45,6 +47,8 @@ def main():
         print("API key missing in config.py.")
         sys.exit(1)
 
+    mailer = Mailer()
+
     print("🤖 Anti-AI Agent is now running. Type 'exit' to quit.")
     while True:
         print("")
@@ -59,6 +63,25 @@ def main():
             print("")
             print("🤖 Goodbye! Remember, you asked for this.")
             break
+
+        if user_input.lower().startswith('mail:'):
+            # Format: mail: email@domain.de, Nachricht
+            mail_content = user_input[len('mail:'):].strip()
+            if ',' not in mail_content:
+                print("Please use the format: mail: email@domain.de, Nachricht")
+                continue
+            to_addr, prompt = [x.strip() for x in mail_content.split(',', 1)]
+            response = call_openrouter_api(prompt, api_key, api_url)
+            print("")
+            print(f"Agent (to be mailed): {response}")
+            subject = "AI Agent Response"
+            from_addr = config_module.EMAIL
+            to_addrs = [to_addr]
+            if mailer.send_mail(subject, response, from_addr, to_addrs):
+                print("Email sent successfully.")
+            else:
+                print("Failed to send email.")
+            continue
 
         response = call_openrouter_api(user_input, api_key, api_url)
         print("")
