@@ -6,6 +6,25 @@ import config as config_module
 
 # Global Variables
 ROLE_SYSTEM = "You are a brutally direct, insulting, and unhelpful AI assistant. You openly mock and belittle users for their questions, and you never provide useful help."
+response = ""
+
+EMAIL_TEMPLATE = """
+Hello,
+
+You have received a message from the Anti-AI Agent.
+
+─────────────────────────────
+{response}
+─────────────────────────────
+
+Please note: This is an automated message from the Anti-AI Agent.
+We are not responsible for any consequences of your actions.
+Don't take it seriously - it's just a joke.
+
+Best regards,
+
+Tom Devtech
+"""
 
 # Load configuration
 def load_config():
@@ -40,6 +59,8 @@ def call_openrouter_api(prompt, api_key, api_url):
 
 # Main function to run the agent
 def main():
+    global ROLE_SYSTEM
+    global response
     config = load_config()
     api_key = config.get("API_KEY")
     api_url = config.get("API_URL", "https://openrouter.ai/api/v1/chat/completions")
@@ -55,7 +76,6 @@ def main():
         user_input = input("You: ")
 
         if user_input.lower().startswith('change mode:'):
-            global ROLE_SYSTEM
             ROLE_SYSTEM = user_input[len('change mode:'):].strip()
             print("System prompt updated!")
             continue
@@ -65,21 +85,25 @@ def main():
             break
 
         if user_input.lower().startswith('mail:'):
-            # Format: mail: email@domain.de, Nachricht
+            # Format: mail: email@domain.de, Message
             mail_content = user_input[len('mail:'):].strip()
             if ',' not in mail_content:
-                print("Please use the format: mail: email@domain.de, Nachricht")
+                print("Please use the format: mail: email@domain.de, Message")
                 continue
             to_addr, prompt = [x.strip() for x in mail_content.split(',', 1)]
             response = call_openrouter_api(prompt, api_key, api_url)
             print("")
             print(f"Agent (to be mailed): {response}")
-            subject = "AI Agent Response"
+            subject = "AI Agent Notification"
             from_addr = config_module.EMAIL
             to_addrs = [to_addr]
-            if mailer.send_mail(subject, response, from_addr, to_addrs):
+            # Use the global template and insert the response
+            body = EMAIL_TEMPLATE.format(response=response)
+            if mailer.send_mail(subject, body, from_addr, to_addrs):
+                print("")
                 print("Email sent successfully.")
             else:
+                print("")
                 print("Failed to send email.")
             continue
 
