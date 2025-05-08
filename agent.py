@@ -75,10 +75,19 @@ def main():
         print("")
         user_input = input("You: ")
 
-        if user_input.lower().startswith('change mode:'):
-            ROLE_SYSTEM = user_input[len('change mode:'):].strip()
-            print("System prompt updated!")
+        if user_input.lower().startswith('changemode'):
+            new_role = user_input[len('changemode'):].strip()
+            print("\n--- System Prompt Preview ---")
+            print(new_role)
+            print("-----------------------------\n")
+            confirm = input("Change system prompt to this? (yes/no): ").strip().lower()
+            if confirm == "yes":
+                ROLE_SYSTEM = new_role
+                print("System prompt updated!")
+            else:
+                print("System prompt not changed.")
             continue
+
         if user_input.lower() == 'exit':
             print("")
             print("🤖 Goodbye! Remember, you asked for this.")
@@ -90,20 +99,29 @@ def main():
                 print("Invalid email address.")
                 continue
             prompt = input("Message: ").strip()
-            response = call_openrouter_api(prompt, api_key, api_url)
-            print("")
-            print(f"Agent (to be mailed): {response}")
-            subject = "AI Agent Notification"
-            from_addr = config_module.EMAIL
-            to_addrs = [to_addr]
-            body = EMAIL_TEMPLATE.format(response=response)
-            if mailer.send_mail(subject, body, from_addr, to_addrs):
-                print("")
-                print("Email sent successfully.")
-            else:
-                print("")
-                print("Failed to send email.")
-            continue
+            while True:
+                response = call_openrouter_api(prompt, api_key, api_url)
+                print("\n--- Message Preview ---")
+                print(response)
+                print("----------------------\n")
+                confirm = input("Send this message? (yes/regenerate/cancel): ").strip().lower()
+                if confirm == "yes":
+                    subject = "AI Agent Notification"
+                    from_addr = config_module.EMAIL
+                    to_addrs = [to_addr]
+                    body = EMAIL_TEMPLATE.format(response=response)
+                    if mailer.send_mail(subject, body, from_addr, to_addrs):
+                        print("\nEmail sent successfully.")
+                    else:
+                        print("\nFailed to send email.")
+                    break
+                elif confirm == "regenerate":
+                    print("Regenerating response...")
+                    continue
+                else:
+                    print("Cancelled.")
+                    break
+            continue  # <-- Add this line to prevent further processing of 'mailmode'
 
         response = call_openrouter_api(user_input, api_key, api_url)
         print("")
