@@ -84,20 +84,18 @@ def main():
             print("🤖 Goodbye! Remember, you asked for this.")
             break
 
-        if user_input.lower().startswith('mail:'):
-            # Format: mail: email@domain.de, Message
-            mail_content = user_input[len('mail:'):].strip()
-            if ',' not in mail_content:
-                print("Please use the format: mail: email@domain.de, Message")
+        if user_input.lower() == 'mailmode':
+            to_addr = input("Recipient email address: ").strip()
+            if '@' not in to_addr:
+                print("Invalid email address.")
                 continue
-            to_addr, prompt = [x.strip() for x in mail_content.split(',', 1)]
+            prompt = input("Message: ").strip()
             response = call_openrouter_api(prompt, api_key, api_url)
             print("")
             print(f"Agent (to be mailed): {response}")
             subject = "AI Agent Notification"
             from_addr = config_module.EMAIL
             to_addrs = [to_addr]
-            # Use the global template and insert the response
             body = EMAIL_TEMPLATE.format(response=response)
             if mailer.send_mail(subject, body, from_addr, to_addrs):
                 print("")
